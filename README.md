@@ -3,10 +3,15 @@
 Minecraft bedrock script API rescript binding.
 
 ## Run
+Before running the generator you should fetch the metadata.
+```sh
+bun run fetch.ts
+```
+
+Then generates a library file in `lib`
 ```sh
 bun run main.ts
 ```
-This generates a library file in `lib`
 
 ## Type Mapping
 - Array Type: `T[] -> array<T>`
@@ -15,13 +20,12 @@ This generates a library file in `lib`
 - Number Type: `number -> int` or `number -> float`
 - Promise Type: `Promise<T> -> promise<T>`
 - Union Type: `A | B | C -> Any('a): t`
-- Class Type: `class T -> type T`
-  - The class definitions should be put in a former.
+- Class Type: `class T -> module T`
 - Void Type: `void -> ()`
 
 ## Function handling
 - For any function that might return `null` or `undefined`, use `@return(nullable)` tag
-- Optional function can be encoded with `option<T>`
+- Optional function argument can be encoded with `option<T>`
 - Functions attached to a JS objects (other than JS modules) require a special way of binding to them, using `send`
 - Variadic Function Arguments (Use tag `@variadic`) (note: not found such type of API)
 - Polymorphic Arguments: for arguments with variant type:
@@ -52,4 +56,9 @@ This generates a library file in `lib`
 - [x] fix dependent types
 - [x] interface inheritance
 - [ ] support generator type
+- [ ] better cli of fetch support
+- [ ] auto generate and publish
 
+## Contributors
+- CAIMEO
+- Lampese

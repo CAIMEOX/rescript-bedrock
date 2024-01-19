@@ -1,3 +1,7 @@
+/**
+ * @coauthor: Lampese
+ */
+
 interface VariantType {
 	is_bind_type: boolean;
 	is_errorable: boolean;
