@@ -1,11 +1,12 @@
 {
-  "name": "bedrockres",
-  "version": "1.0.0",
+  "name": "rescript-bedrock",
+  "version": "1.0.1",
   "description": "Rescript Language Support for Minecraft ScriptAPI.",
   "main": "main.ts",
   "author": "CAIMEO",
   "license": "MIT",
   "dependencies": {
+    "commander": "^11.1.0",
     "graph-data-structure": "^3.5.0",
     "rescript": "^11.0.0"
   },
@@ -14,5 +15,9 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "files": [
+    "src",
+    "rescript.json"
+  ]
 }

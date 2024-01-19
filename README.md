@@ -1,63 +1,125 @@
 # rescript-bedrock
 
-Minecraft bedrock script API rescript binding.
+Minecraft bedrock Script API ReScript wrapper.
 
-## Run
-Before running the generator you should fetch the metadata.
+## Why ReScript?
+**ReScript** is a statically typed language that compiles to efficient and human-readable JavaScript.
+- Leverage the full power of JavaScript in a typed language without the fear of `any` types (in typescript).
+- ReScript has a faster build system than TypeScript.
+- ReScript has a very powerful type system like **ML** and **Haskell**
+
+## Usage
+This repo provides CLI tools to create wrapper of ScriptAPI.
+
 ```sh
-bun run fetch.ts
+Usage: rescript-bedrock [options] [command]
+
+CLI to fetch and process Minecraft metadata
+
+Options:
+  -V, --version                      output the version number
+  -h, --help                         display help for command
+
+Commands:
+  list <branch>                      List all files in script module in a specify branch
+  fetch [options] <branch> <index>   Fetch a single file in script module in a specify branch
+  generate <path> <output>           Generate rescript binding from metadata
+  process <branch> <index> <output>  Fetch metadata and generate rescript binding
+  help [command]                     display help for command
 ```
 
-Then generates a library file in `lib`
+A simple command example can be:
+
 ```sh
-bun run main.ts
+bun run main.ts process preview 17 src/Server.res
 ```
 
-## Type Mapping
-- Array Type: `T[] -> array<T>`
-- Option Type: `T | undefined -> option<T>`
+## Examples
+- Kill chat sender whose name is not **Lampese** 
+```rescript
+open Server
+open WorldAfterEvents
+open ChatSendAfterEventSignal
+
+let on_chat = (e: ChatSendAfterEvent.t) => {
+  open ChatSendAfterEvent
+  open Player
+  if e->sender->name !== "Lampese" {
+    e->sender->kill->ignore
+  }
+}
+
+world->World.afterEvents->chatSend->subscribe(on_chat)->ignore
+```
+
+- Execute a command
+```rescript
+let over_world = world->World.getDimension("overworld")
+over_world->Dimension.runCommand("say Hello World!")->ignore
+```
+
+- Kill all players
+```rescript
+world->World.getAllPlayers->map((e: Player.t) => {
+  e->Player.kill
+})->ignore
+```
+
+For more examples, go to directory `demo`.
+
+## Design
+### Type Mapping
+The type definitions in metadata (TypeScript-like) will be mapped into ReScript types:
+- Array Type: `T[] -> array<Tt>`
+- Option Type: `T | undefined -> option<t>`
 - Boolean Type: `boolean -> bool`
-- Number Type: `number -> int` or `number -> float`
-- Promise Type: `Promise<T> -> promise<T>`
-- Union Type: `A | B | C -> Any('a): t`
-- Class Type: `class T -> module T`
-- Void Type: `void -> ()`
+- Number Type: 
+  - `int64 -> int`
+  - `int32 -> int`
+  - `uint32 -> int`
+  - `uint64 -> int`
+  - `float -> float`
+  - `double -> float`
+- Promise Type: `Promise<T> -> promise<t>`
+- Union Type: `A | B | C -> @unwrap [ | #A(a) | #B(a) | #C(c) ]`
+- Enum Type: `enum T { A1 = V1, A2 = V2, ... } -> type t = | @as(V1) A1 | @as(V2) A2 | ...`
+- Interface Type:
+  - `interface T {...} -> type t = {...}`
+  - `interface T extends E {...} -> type t = { ...e, ... }` 
+- Map Type:
+  - `Map<string, T> -> Belt.Map.String.t<t>`
+  - `Map<int, T> -> Belt.Map.Int.t<t>`
+- Class Type:
+  - Introduction: `class T -> type _T`
+  - Inheritance:
+    - Base type: `module Impl = ( T: { type t } ) => {}`
+    - Sub type: `include Impl({ type t = t })`
+  - Formation: `class T -> Module T = { type t = _T }`
+- Function Type: `(a: A, b: B): c: C -> (A, B) => C`
+- Void Type: `void -> unit`
+- Generator: **unimplemented**
 
-## Function handling
-- For any function that might return `null` or `undefined`, use `@return(nullable)` tag
-- Optional function argument can be encoded with `option<T>`
-- Functions attached to a JS objects (other than JS modules) require a special way of binding to them, using `send`
-- Variadic Function Arguments (Use tag `@variadic`) (note: not found such type of API)
+### Class handling
+- For any function that might return `null` or `undefined`, use `@return(nullable)` tag.
+  - Optional function argument can be encoded with `option<T>`
+- Functions attached to a JS objects (other than JS modules) require a special way of binding to them, using `@send`
+- Get static field of class
+  - `@scope("ClassName") @val external field: string = "field"`
+- Variadic Function Arguments (Use tag `@variadic`) 
+  - (note: **unused** currently)
 - Polymorphic Arguments: for arguments with variant type:
-  - `@unwrap[|#A(t1)|#B(t2)]`
-  - Type can be callback function
+  - `@unwrap[ |#A(t1) |#B(t2) ]`
   - for finite string or int arguments: 
     - `@string[#str1|#str2|@as("str3") #Str3]`
     - `@int[#int1|#int2|#int3]`
-- Some wired types
-  - The `getDynamicProperty` function returns union types
-    - `getDynamicProperty(identifier: string): boolean | number | string | Vector3 | undefined`
+- The only Dependent Types in Script API is `Component[T]` where the type function is indexed by `string` type
+  - Return type is set to `Component`
+  - Add a module `Component` for unsafe casts
 
-## Some Ideas
-- Using `include` in a module statically "spreads" a module's content into a new one, thus often fulfill the role of "**inheritance**" or "**mixin**". (This is equivalent to a compiler-level copy paste.)
-- Use **Implementation inheritance** for inheritance class
-- For documentation, use attribute `@ocaml.doc` before the object
-
-## RoadMap
-- [x] create name mapping
-- [x] handle all enum types
-- [x] handle all constants types
-- [x] handle all error types
-- [x] handle all interfaces
-- [x] handle all classes
-- [x] handle all interfaces
-  - Collect all inheritance Classes
-  - Build inheritance graph
-- [x] fix dependent types
-- [x] interface inheritance
-- [ ] support generator type
-- [ ] better cli of fetch support
-- [ ] auto generate and publish
+## To Do
+- [ ] Support generator type
+- [ ] Auto generate and publish
+- [ ] Documentation with `@ocaml.doc`
 
 ## Contributors
 - CAIMEO

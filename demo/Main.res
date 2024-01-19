@@ -61,11 +61,9 @@ let on_chat = (e: ChatSendAfterEvent.t) => {
   }
 }
 
-let kill = (e: Player.t) => {
-  e->Player.kill->ignore
-}
-
 world->World.afterEvents->chatSend->subscribe(on_chat)->ignore
-world->World.getAllPlayers->map(kill)->ignore
+world->World.getAllPlayers->map((e: Player.t) => {
+  e->Player.kill
+})->ignore
 
 overworld->Dimension.runCommand("say Hello World!")->ignore

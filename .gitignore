@@ -3,3 +3,4 @@ pnpm-lock.yaml
 bun.lockb
 meta
 package-lock.json
+lib
