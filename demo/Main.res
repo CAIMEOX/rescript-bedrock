@@ -1,4 +1,4 @@
-open Server
+open! Server
 open WorldAfterEvents
 open ChatSendAfterEventSignal
 open Js.Array2
@@ -62,8 +62,5 @@ let on_chat = (e: ChatSendAfterEvent.t) => {
 }
 
 world->World.afterEvents->chatSend->subscribe(on_chat)->ignore
-world->World.getAllPlayers->map((e: Player.t) => {
-  e->Player.kill
-})->ignore
-
+world->World.getAllPlayers->map(Player.kill)->ignore
 overworld->Dimension.runCommand("say Hello World!")->ignore

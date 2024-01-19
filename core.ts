@@ -147,14 +147,23 @@ const generate_interface = () => {
 			i.base_types && i.base_types.length > 0
 				? interfaceMap.get(i.base_types[0].name)!.properties.concat(i.properties)
 				: i.properties;
-		const fields = props
+		const fields_arr = i.properties
 			.map((v: ConstantsType) => {
 				const obj_name = KEYWORDS.includes(cc2sc(v.name))
 					? `@as("${cc2sc(v.name)}") ${cc2sc(v.name)}_`
 					: cc2sc(v.name);
-				return `${obj_name}: ${format_type(v.type)}`;
+				if (v.type.name === 'optional') {
+					return `${obj_name}?: ${format_type(v.type.optional_type!)}`;
+				} else {
+					return `${obj_name}: ${format_type(v.type)}`;
+				}
 			})
-			.join(', ');
+		if (i.base_types.length > 0) {
+			i.base_types.map((x) => {
+				fields_arr.push(`...${cc2sc(x.name)}`)
+			})
+		}
+		const fields = fields_arr.join(', ');
 		const prefix = fields.includes(cc2sc(i.name)) ? 'type rec' : 'type';
 		result.push(`${prefix} ${cc2sc(i.name)} = {${fields}}`);
 	};
