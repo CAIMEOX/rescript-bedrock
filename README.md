@@ -2,6 +2,8 @@
 
 Minecraft bedrock Script API ReScript wrapper.
 
+- [中文](./README_zh.md)
+
 ## Why ReScript?
 **ReScript** is a statically typed language that compiles to efficient and human-readable JavaScript.
 - Leverage the full power of JavaScript in a typed language without the fear of `any` types (in typescript).

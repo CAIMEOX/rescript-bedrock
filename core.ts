@@ -143,10 +143,6 @@ const generate_interface = () => {
 		});
 	});
 	const interface_transform = (i: InterfaceType) => {
-		const props =
-			i.base_types && i.base_types.length > 0
-				? interfaceMap.get(i.base_types[0].name)!.properties.concat(i.properties)
-				: i.properties;
 		const fields_arr = i.properties
 			.map((v: ConstantsType) => {
 				const obj_name = KEYWORDS.includes(cc2sc(v.name))
@@ -265,7 +261,12 @@ const generate_class = () => {
 					return_type: format_type(f.return_type, type_name),
 					arguments: [
 						type_name[1],
-						...f.arguments.map((a) => format_type(a.type, type_name))
+						...f.arguments.map((a) => {
+							const is_optional = a.type.name === 'optional';
+							return is_optional
+								? `~${a.name}: ${format_type(a.type.optional_type!, type_name)} =?`
+								: format_type(a.type, type_name)
+						})
 					]
 				});
 			});
